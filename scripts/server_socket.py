@@ -1,8 +1,5 @@
 import socket
-
-# server's IP address
-SERVER_HOST = "0.0.0.0"
-SERVER_PORT = 5002  # port we want to use
+from server_config import SERVER_HOST, SERVER_PORT
 
 
 class ServerSocket():

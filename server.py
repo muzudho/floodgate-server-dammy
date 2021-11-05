@@ -4,8 +4,7 @@ import signal
 from scripts.log_output import LogOutput, log_output
 from scripts.server_p import ServerP
 from scripts.server_socket import server_socket
-
-MESSAGE_SIZE = 1024
+from server_config import MESSAGE_SIZE
 
 separator_token = "<SEP>"  # we will use this to separate the client name & message
 client_sockets = None
