@@ -11,8 +11,10 @@ class ServerP():
 
     def listen_line(self, line):
         result = self._state.listen_line(line)
+        log_output.display_and_log_internal(
+            f"result=[{result}] self._state.name=[{self._state.name}]")
 
-        if self._state == '[None]':
+        if self._state.name == '[None]':
             if result == '<NoneState.Login/>':
                 log_output.display_and_log_internal(
                     f'Login user_name=[{self._state.user_name}] password=[{self._state.password}]')
@@ -21,12 +23,10 @@ class ServerP():
 
                 self._state = MadeGame()
 
-        elif self._state == '[MadeGame]':
+        elif self._state.name == '[MadeGame]':
             pass
         else:
             pass
-
-        log_output.display_and_log_internal(result)
 
 
 if __name__ == "__main__":
