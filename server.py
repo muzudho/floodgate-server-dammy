@@ -2,20 +2,17 @@ import socket
 from threading import Thread
 import sys
 import signal
+from scripts.log_output import LogOutput, log_output
 
 MESSAGE_SIZE = 1024
 
-sock = None
+server_sock = None
 separator_token = "<SEP>"  # we will use this to separate the client name & message
 client_sockets = None
 
 
-def sigterm_handler(_signum, _frame) -> None:
-    sys.exit(1)
-
-
 def clean_up():
-    global sock
+    global server_sock
     global client_sockets
 
     # close client sockets
@@ -25,13 +22,13 @@ def clean_up():
             cs.close()
 
     # close server socket
-    if not (sock is None):
-        sock.close()
+    if not (server_sock is None):
+        server_sock.close()
 
 
-def listen_for_client(cs):
+def listen_for_client(client_sock):
     """
-    This function keep listening for a message from `cs` socket
+    This function keep listening for a message from `client_sock` socket
     Whenever a message is received, broadcast it to all other connected clients
     """
     global separator_token
@@ -39,28 +36,45 @@ def listen_for_client(cs):
 
     while True:
         try:
-            # keep listening for a message from `cs` socket
-            msg = cs.recv(MESSAGE_SIZE).decode()
+            # keep listening for a message from `client_sock` socket
+            line = client_sock.recv(MESSAGE_SIZE).decode()
         except Exception as e:
             # client no longer connected
             # remove it from the set
             print(f"[!] Error: {e}")
 
             print(f"Remove a socket")
-            client_sockets.remove(cs)
-        else:
-            # if we received a message, replace the <SEP>
-            # token with ": " for nice printing
-            msg = msg.replace(separator_token, ": ")
+            client_sockets.remove(client_sock)
+            break
 
-        # iterate over all connected sockets
-        for client_socket in client_sockets:
-            # and send the message
-            client_socket.send(msg.encode())
+        # TODO パーサー
+
+        # とりあえずエコー
+        send_line(client_sock, line)
+
+
+def send_line(client_sock, line):
+    client_sock.send(line.encode())
+
+    s = LogOutput.format_send(line)
+
+    # Display
+    print(s)
+
+    # Log
+    log_output.write(s)
+    log_output.flush()
+
+
+def set_up():
+    global log_output
+
+    print("# Set up")
+    log_output.set_up()
 
 
 def run_server():
-    global sock
+    global server_sock
     global client_sockets
 
     # server's IP address
@@ -71,22 +85,22 @@ def run_server():
     client_sockets = set()
 
     # create a TCP socket
-    sock = socket.socket()
+    server_sock = socket.socket()
 
     # make the port as reusable port
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     # bind the socket to the address we specified
-    sock.bind((SERVER_HOST, SERVER_PORT))
+    server_sock.bind((SERVER_HOST, SERVER_PORT))
 
     # listen for upcoming connections
-    sock.listen(5)
+    server_sock.listen(5)
     print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
 
     while True:
         print(f"Wait a connection")
         # we keep listening for new connections all the time
-        client_socket, client_address = sock.accept()
+        client_socket, client_address = server_sock.accept()
         print(f"[+] {client_address} connected.")
 
         # add the new connected client to connected sockets
@@ -103,8 +117,12 @@ def run_server():
 
 
 def main():
+    def sigterm_handler(_signum, _frame) -> None:
+        sys.exit(1)
+
     # 強制終了のシグナルを受け取ったら、強制終了するようにします
     signal.signal(signal.SIGTERM, sigterm_handler)
+    set_up()
 
     try:
         run_server()
