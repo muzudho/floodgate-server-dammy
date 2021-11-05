@@ -57,7 +57,7 @@ def listen_for_client(client_sock):
             break
 
         # 処理は server_p に委譲します
-        server_p.listen_line(line)
+        server_p.parse_line(line)
 
         # とりあえずエコー
         send_line(client_sock, line)

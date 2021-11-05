@@ -23,7 +23,7 @@ class NoneState():
     def password(self):
         return self._password
 
-    def listen_line(self, line):
+    def parse_line(self, line):
         matched = self._login_pattern.match(line)
         if matched:
             # ログイン
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     line = 'LOGIN e-gov-vote-kifuwarabe floodgate-300-10F,password'
 
     none_state = NoneState()
-    result = none_state.listen_line(line)
+    result = none_state.parse_line(line)
     if result == '<NoneState.Login/>':
         print('.', end='')
     else:

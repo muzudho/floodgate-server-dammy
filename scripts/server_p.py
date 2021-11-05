@@ -1,5 +1,5 @@
 from scripts.server_state.none_state import NoneState
-from scripts.server_state.made_game import MadeGame
+from scripts.server_state.made_game_state import MadeGameState
 from scripts.log_output import log_output
 
 
@@ -9,13 +9,13 @@ class ServerP():
     def __init__(self):
         self._state = NoneState()
 
-    def listen_line(self, line):
-        print(f"listen_line: line=[{line}]")
+    def parse_line(self, line):
+        print(f"parse_line: line=[{line}]")
 
-        result = self._state.listen_line(line)
+        result = self._state.parse_line(line)
 
         log_output.display_and_log_internal(
-            f"self._state.name=[{self._state.name}] result=[{result}]")
+            f"Before: self._state.name=[{self._state.name}] result=[{result}]")
 
         if self._state.name == '<None/>':
             if result == '<NoneState.Login/>':
@@ -24,12 +24,15 @@ class ServerP():
 
                 # TODO ２人以上のユーザーがログインしていて、マッチングに成功したとします
 
-                self._state = MadeGame()
+                self._state = MadeGameState()
 
-        elif self._state.name == '<MadeGame/>':
+        elif self._state.name == '<MadeGameState/>':
             pass
         else:
             pass
+
+        log_output.display_and_log_internal(
+            f"After: self._state.name=[{self._state.name}]")
 
 
 if __name__ == "__main__":
@@ -37,7 +40,7 @@ if __name__ == "__main__":
     line = 'LOGIN:egov-kifuwarabe OK'
 
     server_p = ServerP()
-    result = server_p.listen_line(line)
+    result = server_p.parse_line(line)
     if result == '<NoneState.Login/>':
         print('.', end='')
     else:
