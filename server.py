@@ -1,21 +1,30 @@
-import socket
 from threading import Thread
 import sys
 import signal
 from scripts.log_output import LogOutput, log_output
 from scripts.server_p import ServerP
+from scripts.server_socket import server_socket
 
 MESSAGE_SIZE = 1024
 
-server_sock = None
 separator_token = "<SEP>"  # we will use this to separate the client name & message
 client_sockets = None
 
 server_p = None
 
 
+def set_up():
+    global log_output
+    global server_p
+
+    print("# Set up")
+    log_output.set_up()
+
+    server_p = ServerP()
+
+
 def clean_up():
-    global server_sock
+    global server_socket
     global client_sockets
 
     # close client sockets
@@ -25,8 +34,7 @@ def clean_up():
             cs.close()
 
     # close server socket
-    if not (server_sock is None):
-        server_sock.close()
+    server_socket.clean_up()
 
 
 def listen_for_client(client_sock):
@@ -70,44 +78,19 @@ def send_line(client_sock, line):
     log_output.flush()
 
 
-def set_up():
-    global log_output
-    global server_p
-
-    print("# Set up")
-    log_output.set_up()
-
-    server_p = ServerP()
-
-
 def run_server():
-    global server_sock
+    global server_socket
     global client_sockets
-
-    # server's IP address
-    SERVER_HOST = "0.0.0.0"
-    SERVER_PORT = 5002  # port we want to use
 
     # initialize list/set of all connected client's sockets
     client_sockets = set()
 
-    # create a TCP socket
-    server_sock = socket.socket()
-
-    # make the port as reusable port
-    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    # bind the socket to the address we specified
-    server_sock.bind((SERVER_HOST, SERVER_PORT))
-
-    # listen for upcoming connections
-    server_sock.listen(5)
-    print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+    server_socket.set_up()
 
     while True:
         print(f"Wait a connection")
         # we keep listening for new connections all the time
-        client_socket, client_address = server_sock.accept()
+        client_socket, client_address = server_socket.accept()
         print(f"[+] {client_address} connected.")
 
         # add the new connected client to connected sockets
