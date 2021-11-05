@@ -23,7 +23,7 @@ class NoneState():
         return self._password
 
     def listen_line(self, line):
-        matched = self._login_ok_pattern.match(line)
+        matched = self._login_pattern.match(line)
         if matched:
             # ログイン
             self._user_name = matched.group(1)

@@ -3,12 +3,15 @@ from threading import Thread
 import sys
 import signal
 from scripts.log_output import LogOutput, log_output
+from scripts.server_p import ServerP
 
 MESSAGE_SIZE = 1024
 
 server_sock = None
 separator_token = "<SEP>"  # we will use this to separate the client name & message
 client_sockets = None
+
+server_p = None
 
 
 def clean_up():
@@ -47,7 +50,8 @@ def listen_for_client(client_sock):
             client_sockets.remove(client_sock)
             break
 
-        # TODO パーサー
+        # 処理は server_p に委譲します
+        server_p.listen_line(line)
 
         # とりあえずエコー
         send_line(client_sock, line)
@@ -68,9 +72,12 @@ def send_line(client_sock, line):
 
 def set_up():
     global log_output
+    global server_p
 
     print("# Set up")
     log_output.set_up()
+
+    server_p = ServerP()
 
 
 def run_server():
