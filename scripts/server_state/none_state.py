@@ -5,14 +5,15 @@ class NoneState():
     def __init__(self):
         # Format: `LOGIN <username> <password>`
         # Example: `LOGIN e-gov-vote-kifuwarabe floodgate-300-10F,password`
+        # TODO パスワードに使える文字の制限が分かんない
         self._login_pattern = re.compile(
-            r'^LOGIN ([0-9A-Za-z_-]{0,32}) ([0-9A-Za-z_-]{0,32})$')
+            r'^LOGIN ([0-9A-Za-z_-]{0,32}) (.{0,32})$')
         self._user_name = ''
         self._password = ''
 
     @property
     def name(self):
-        return "[None]"
+        return "<None/>"
 
     @property
     def user_name(self):
@@ -31,3 +32,16 @@ class NoneState():
             return '<NoneState.Login/>'
 
         return '<NoneState.Unknown/>'
+
+
+# Test
+# python.exe "./scripts/server_state/none_state.py"
+if __name__ == "__main__":
+    line = 'LOGIN e-gov-vote-kifuwarabe floodgate-300-10F,password'
+
+    none_state = NoneState()
+    result = none_state.listen_line(line)
+    if result == '<NoneState.Login/>':
+        print('.', end='')
+    else:
+        print('f', end='')

@@ -9,7 +9,7 @@ class MadeGame():
 
     @property
     def name(self):
-        return "[MadeGame]"
+        return "<MadeGame/>"
 
     def listen_line(self, line):
         return '<MadeGame.Unknown/>'

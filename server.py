@@ -6,9 +6,7 @@ from scripts.server_p import ServerP
 from scripts.server_socket import server_socket
 from server_config import MESSAGE_SIZE
 
-separator_token = "<SEP>"  # we will use this to separate the client name & message
 client_sockets = None
-
 server_p = None
 
 
@@ -41,13 +39,14 @@ def listen_for_client(client_sock):
     This function keep listening for a message from `client_sock` socket
     Whenever a message is received, broadcast it to all other connected clients
     """
-    global separator_token
     global client_sockets
 
     while True:
         try:
             # keep listening for a message from `client_sock` socket
             line = client_sock.recv(MESSAGE_SIZE).decode()
+            print(f"listen_for_client: line=[{line}]")
+
         except Exception as e:
             # client no longer connected
             # remove it from the set
